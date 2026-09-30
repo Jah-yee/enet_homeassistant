@@ -340,7 +340,10 @@ class Actuator(BaseEnetDevice):
                     f"  ccg: {ccg} dc: {dc} Channel type: {device_channel['channelTypeID']} area: {device_channel['effectArea']}"
                 )
                 if device_channel["channelTypeID"] != "CT_DEVICE":
-                    c = Channel(self, device_channel)
+                    try:
+                        c = Channel(self, device_channel)
+                    except TypeError:
+                        continue
                     self.channels.append(c)
 
                 # for odf, output_func in enumerate(
@@ -373,6 +376,8 @@ class Channel:
         self.state = 0
 
     def _build_value_template(self):
+        if self._output_device_function is None:
+            return None
         value_template = self._output_device_function["currentValues"][0]
         if "valueUID" in value_template:
             del value_template["valueUID"]
